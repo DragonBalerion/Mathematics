@@ -134,6 +134,7 @@ def update_df(number_to_check, df, file):
         df.to_csv(file)
 
         if number_to_check > df.values.max():
+            print('Updating DataFrame')
             return update_df(number_to_check, df, file)
 
 
