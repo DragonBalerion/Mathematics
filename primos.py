@@ -47,23 +47,16 @@ def is_prime(number, file):
             return False
 
         else:
-            count = 0
             for value in df.values:
                 if any(number % value == 0):
-                    count += 1
                     return False
-            if count == 0:
-                return True
+            return True
     else:
         count = 0
-        for num in range(1, number + 1):
+        for num in range(2, number):
             if number % num == 0:
-                count += 1
-        if count == 2:
-            return True
-        else:
-            return False
-
+                return False
+        return True
 
 def check_df(file):
     """Check if the CSV file exists
@@ -134,7 +127,6 @@ def update_df(number_to_check, df, file):
         if number_to_check > df.values.max():
             return update_df(number_to_check, df, file)
 
-
 def main():
     print('---------------------------------------------------------------------------')
     print('This program tell you if a number is Prime or Not. Follow the indications: ')
@@ -151,7 +143,5 @@ def main():
         print('{} is a PRIME NUMBER :)'.format(number_to_check))
     else:
         print('{} is NOT a Prime Number. :('.format(number_to_check))
-
-
 
 main()
