@@ -48,14 +48,11 @@ def is_prime(number, file):
 
         else:
             count = 0
-
             for value in df.values:
                 if any(number % value == 0):
                     count += 1
-
-            if count >= 1:
-                return False
-            else:
+                    return False
+            if count == 0:
                 return True
     else:
         count = 0
@@ -114,6 +111,7 @@ def update_df(number_to_check, df, file):
     """
 
     if number_to_check > df.values.max():
+        print('Updating DataFrame..., Number to check is {}, the maximum prime number in df is {}'.format(number_to_check,df.values.max()))
         primos_list = []
 
         string = df.columns[-1]
@@ -134,7 +132,6 @@ def update_df(number_to_check, df, file):
         df.to_csv(file)
 
         if number_to_check > df.values.max():
-            print('Updating DataFrame')
             return update_df(number_to_check, df, file)
 
 
@@ -147,16 +144,14 @@ def main():
     file = 'primos.csv'
     df = check_df(file)
     update_df(number_to_check, df, file)
+    print('---------------------------------------------------------------------------')
     df = check_df(file)
 
     if is_prime(number_to_check, file):
         print('{} is a PRIME NUMBER :)'.format(number_to_check))
     else:
         print('{} is NOT a Prime Number. :('.format(number_to_check))
-    # print(df)
-    # print(df.values)
-    print(df)
-    print(df.values.max())
+
 
 
 main()
