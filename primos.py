@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import pandas as pd
 import os
-import regex as re
+import numpy as np
+
 
 def get_number():
     """Get number from the user
@@ -21,127 +21,117 @@ def get_number():
         number = input('{} is not a integer number. Please, enter an integer number: \n'.format(number))
     return int(number)
 
-def is_prime(number, file):
+def is_prime(number, prime_array):
     """Check if a number is prime
 
-    It will check if a CSV file exists and check if the number is in that CSV file,
-    if False, it will check if a number is divisible by any prime number in the CSV file.
+    It will check if number is in prime_array, returning True, and if the number is not in prime_array,
+    and it less that the maximum number in it. It will return False.
 
-    If the file does not exist, it will check if a number is divisible
-    by all its previous numbers greater that one.
+    otherwise will update the prime_array.
 
     Args:
         number: number to check if it is a prime or not.
-        file: it is the name of the CSV file.
+        prime_array: numpy array with the prime number.
 
     Returns:
         True if the number is prime, False otherwise.
     """
-    if os.path.isfile(file):
-        df = pd.read_csv(file, index_col=0)
 
-        if number in df.values:
-            return True
-
-        elif number < df.values.max():
-            return False
-
-        else:
-            for value in df.values:
-                if any(number % value == 0):
-                    return False
-            return True
-    else:
-        count = 0
-        for num in range(2, number):
-            if number % num == 0:
-                return False
+    if number in prime_array:
         return True
 
-def check_df(file):
-    """Check if the CSV file exists
+    elif number < prime_array.max():
+        return False
 
-    Check if the CSV file exists, and it will create it if it doesn't find it.
+def is_prime_array(number):
+    """check if a number if prime, when creating the prime_array.
+
+    It will check from 2 to the sqrt of number if number is divisible by any number in that range.
 
     Args:
-        file: it is the name of the CSV file.
+        number: number to check if it is a prime or not.
 
     Returns:
-        A DataFrame
+        True if the number is prime, False otherwise.
     """
+    count = 0
+    for num in range(2, int(np.sqrt(number)) + 1):
+        if number % num == 0:
+            return False
+    return True
+
+def check_list():
+    """check if exist primos.txt.
+
+    It will check if primos.txt exist, if not, it will create.
+    Args:
+        none
+
+    Returns:
+        prime_array
+    """
+    file = 'primos.txt'
     if os.path.isfile(file):
-        return pd.read_csv(file, index_col=0)
-
+        prime_array = np.loadtxt(file, dtype=int)
     else:
-        df = pd.DataFrame()
-        primos_list = []
-
+        prime_array = np.array([])
         number = 2
-        while len(primos_list) < 100:
-            if is_prime(number, file):
-                primos_list.append(number)
+        while len(prime_array) < 100:
+            if is_prime_array(number):
+                prime_array = np.append(prime_array, number)
             number += 1
-        df['1-100'] = primos_list
-        df.to_csv(file)
-        return df
+    return prime_array
 
-def update_df(number_to_check, df, file):
-    """Update the DataFrame
+def update_array(prime_array):
+    """Update prime_array.
 
-    Check if it is necessary to update the DataFrame.
-    (if the number to check is less than the maximum number in the DataFram).
-
-    It will keep updating the DataFrame and save it,
-    until the number to check is less than the maximum.
+    It will update prime array, it will add 100 prime number to prime array, and it will save it in a txt file.
 
     Args:
-        number_to_check: The number to check.
-        df: DataFrame
-        file: it is the name of the CSV file.
+        prime_array = numpy array with the prime numbers.
 
     Returns:
-        Nothings, but it will save the updated DataFrame in a CSV file.
+        prime_array
     """
 
-    if number_to_check > df.values.max():
-        print('Updating DataFrame..., Number to check is {}, the maximum prime number in df is {}'.format(number_to_check,df.values.max()))
-        primos_list = []
+    number = prime_array.max() + 1
+    original_size_array = len(prime_array)
 
-        string = df.columns[-1]
-        patter = r'(\d*)-(\d*)'
-        result = re.search(patter, string)
+    number = prime_array.max()
 
-        number = df.values.max() + 1
+    while len(prime_array) < original_size_array + 100:
+        count = 0
+        for prime in prime_array[prime_array <= np.sqrt(number)]:
+            if number % prime == 0:
+                count += 1
+                break
+        if count == 0:
+            prime_array = np.append(prime_array,number)
+        number += 1
+    return prime_array
 
-        while len(primos_list) < 100:
-            if is_prime(number, file):
-                primos_list.append(number)
-            number += 1
+def update_array_until_number(number, prime_array):
+    while number > prime_array.max():
+        print('Updating prime_array ...')
+        prime_array = update_array(prime_array)
+    return prime_array
 
-        nume = int(result.group(2))
-        colum_name = '{}-{}'.format(nume + 1, nume + 100)
-
-        df[colum_name] = primos_list
-        df.to_csv(file)
-
-        if number_to_check > df.values.max():
-            return update_df(number_to_check, df, file)
 
 def main():
     print('---------------------------------------------------------------------------')
     print('This program tell you if a number is Prime or Not. Follow the indications: ')
     print('---------------------------------------------------------------------------')
-    number_to_check = get_number()
+    number = get_number()
     print('---------------------------------------------------------------------------')
-    file = 'primos.csv'
-    df = check_df(file)
-    update_df(number_to_check, df, file)
+    prime_array = check_list()
+    prime_array = update_array_until_number(number, prime_array)
     print('---------------------------------------------------------------------------')
-    df = check_df(file)
-
-    if is_prime(number_to_check, file):
-        print('{} is a PRIME NUMBER :)'.format(number_to_check))
+    file = 'primos.txt'
+    np.savetxt(file, prime_array, fmt='%d')
+    print(prime_array)
+    if is_prime(number, prime_array):
+        print('{} is a PRIME NUMBER :)'.format(number))
     else:
-        print('{} is NOT a Prime Number. :('.format(number_to_check))
+        print('{} is NOT a Prime Number. :('.format(number))
 
 main()
