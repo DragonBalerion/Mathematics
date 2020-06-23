@@ -15,10 +15,10 @@ def get_number():
     Returns:
         An integer number.
     """
-    number = input('enter an integer number to check if is a Prime Number or Not: \n')
+    number = input('Enter an integer number: \n')
 
     while number.isnumeric() == False:
-        number = input('{} is not a integer number. Please, enter an integer number: \n'.format(number))
+        number = input('{} is not a integer number. Try again: \n'.format(number))
     return int(number)
 
 def is_prime(number, prime_array):
@@ -27,7 +27,7 @@ def is_prime(number, prime_array):
     It will check if number is in prime_array, returning True, and if the number is not in prime_array,
     and it less that the maximum number in it. It will return False.
 
-    otherwise will update the prime_array.
+    otherwise will check if number is prime using prime_array.
 
     Args:
         number: number to check if it is a prime or not.
@@ -43,95 +43,92 @@ def is_prime(number, prime_array):
     elif number < prime_array.max():
         return False
 
-def is_prime_array(number):
-    """check if a number if prime, when creating the prime_array.
+    else:
+        for prime in prime_array[prime_array <= np.sqrt(number)]:
+            if number % prime == 0:
+                return False
+        return True
 
-    It will check from 2 to the sqrt of number if number is divisible by any number in that range.
+
+def load_prime_array(file):
+    """Load prime_array file.
+
+    It will check if primos.txt(file) exist returning True and the prime_array;
+    False and None, otherwise.
 
     Args:
-        number: number to check if it is a prime or not.
+        file = name that the txt file has.
 
     Returns:
-        True if the number is prime, False otherwise.
+        Tupple (True, prime_array) or (False, None)
     """
-    count = 0
-    for num in range(2, int(np.sqrt(number)) + 1):
-        if number % num == 0:
-            return False
-    return True
+    if os.path.isfile(file):
+        prime_array = np.loadtxt(file, dtype=int)
+        return True, prime_array
 
-def check_list():
-    """check if exist primos.txt.
+    return False, None
 
-    It will check if primos.txt exist, if not, it will create.
+def update_array(input_number,file):
+    """Update prime_array.
+
+    It will update prime array, and call the save_array(file, prime_array)
+    function.
+
     Args:
-        none
+        input_number = number to check if an update is needed.
+        file = name that the txt file has.
 
     Returns:
         prime_array
     """
-    file = 'primos.txt'
-    if os.path.isfile(file):
-        prime_array = np.loadtxt(file, dtype=int)
+
+    if load_prime_array(file)[0] == True:
+        prime_array = load_prime_array(file)[1]
     else:
-        prime_array = np.array([])
-        number = 2
-        while len(prime_array) < 100:
-            if is_prime_array(number):
-                prime_array = np.append(prime_array, number)
-            number += 1
-    np.savetxt(file, prime_array, fmt='%d')
+        prime_array = np.array([2])
+
+    next_number = prime_array.max() + 1
+    original_size_array = len(prime_array)
+
+    while np.sqrt(input_number) > prime_array.max():
+        if is_prime(next_number, prime_array):
+            prime_array = np.append(prime_array,next_number)
+        next_number += 1
+
+    save_array(file, prime_array)
     return prime_array
 
-def update_array(prime_array):
-    """Update prime_array.
+def save_array(file, prime_array):
+    """Save prime_array.
 
-    It will update prime array, it will add 100 prime number to prime array, and it will save it in a txt file.
+    It will save prime array in a txt file.
 
     Args:
         prime_array = numpy array with the prime numbers.
+        file = name that the txt file will have.
 
     Returns:
-        prime_array
+        None
     """
-
-    number = prime_array.max() + 1
-    original_size_array = len(prime_array)
-    file = 'primos.txt'
-    number = prime_array.max()
-
-    while len(prime_array) < original_size_array + 1000:
-        count = 0
-        for prime in prime_array[prime_array <= np.sqrt(number)]:
-            if number % prime == 0:
-                count += 1
-                break
-        if count == 0:
-            prime_array = np.append(prime_array,number)
-        number += 1
     np.savetxt(file, prime_array, fmt='%d')
-    return prime_array
-
-def update_array_until_number(number, prime_array):
-    while number > prime_array.max():
-        print('Updating prime_array ...')
-        prime_array = update_array(prime_array)
-    return prime_array
 
 
 def main():
+    file = 'primos.txt'
     print('---------------------------------------------------------------------------')
-    print('This program tell you if a number is Prime or Not. Follow the indications: ')
+    print('This program will tell you if a number is Prime or Not.')
+    print('You need to enter an integer number in the following step.')
+    input_number = get_number()
+    prime_array = update_array(input_number, file)
     print('---------------------------------------------------------------------------')
-    number = get_number()
+    print('The Prime array needed to determine if {} was a prime or not was:'.format(input_number))
+    print()
+    print(prime_array[prime_array<=np.sqrt(input_number)])
     print('---------------------------------------------------------------------------')
-    prime_array = check_list()
-    prime_array = update_array_until_number(number, prime_array)
-    print('---------------------------------------------------------------------------')
-    print(prime_array)
-    if is_prime(number, prime_array):
-        print('{} is a PRIME NUMBER :)'.format(number))
+
+    if is_prime(input_number, prime_array):
+        print('{} is a PRIME NUMBER :)'.format(input_number))
     else:
-        print('{} is NOT a Prime Number. :('.format(number))
+        print('{} is NOT a Prime Number. :('.format(input_number))
 
 main()
