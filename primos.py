@@ -87,15 +87,14 @@ def update_array(input_number,file):
     else:
         prime_array = np.array([2])
 
-    next_number = prime_array.max() + 1
-    original_size_array = len(prime_array)
-
-    while np.sqrt(input_number) > prime_array.max():
-        if is_prime(next_number, prime_array):
-            prime_array = np.append(prime_array,next_number)
-        next_number += 1
-
-    save_array(file, prime_array)
+    if np.sqrt(input_number) > prime_array.max():
+        next_number = prime_array.max() + 1
+        while np.sqrt(input_number) > prime_array.max():
+            if is_prime(next_number, prime_array):
+                prime_array = np.append(prime_array,next_number)
+            next_number += 1
+        save_array(file, prime_array)
+    
     return prime_array
 
 def save_array(file, prime_array):
