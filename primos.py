@@ -80,6 +80,7 @@ def check_list():
             if is_prime_array(number):
                 prime_array = np.append(prime_array, number)
             number += 1
+    np.savetxt(file, prime_array, fmt='%d')
     return prime_array
 
 def update_array(prime_array):
@@ -96,10 +97,10 @@ def update_array(prime_array):
 
     number = prime_array.max() + 1
     original_size_array = len(prime_array)
-
+    file = 'primos.txt'
     number = prime_array.max()
 
-    while len(prime_array) < original_size_array + 100:
+    while len(prime_array) < original_size_array + 1000:
         count = 0
         for prime in prime_array[prime_array <= np.sqrt(number)]:
             if number % prime == 0:
@@ -108,6 +109,7 @@ def update_array(prime_array):
         if count == 0:
             prime_array = np.append(prime_array,number)
         number += 1
+    np.savetxt(file, prime_array, fmt='%d')
     return prime_array
 
 def update_array_until_number(number, prime_array):
@@ -126,8 +128,6 @@ def main():
     prime_array = check_list()
     prime_array = update_array_until_number(number, prime_array)
     print('---------------------------------------------------------------------------')
-    file = 'primos.txt'
-    np.savetxt(file, prime_array, fmt='%d')
     print(prime_array)
     if is_prime(number, prime_array):
         print('{} is a PRIME NUMBER :)'.format(number))
